@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using webapi.Models;
 using webapi.Repositories;
 using Microsoft.EntityFrameworkCore;
+using webapi.Infrastructure;
 
 namespace webapi
 {
@@ -28,8 +29,8 @@ namespace webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DatabaseContext>(opts => opts.UseNpgsql("database"));
-            services.AddScoped<DatabaseContext>(); // ApplicationContext
+            services.AddScoped<TenantInfo>();
+            services.UseMultiTenancyPostgresInterceptor(Configuration); 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddControllers();
@@ -42,7 +43,8 @@ namespace webapi
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
+            app.UseMiddleware<TenantInfoMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseRouting();

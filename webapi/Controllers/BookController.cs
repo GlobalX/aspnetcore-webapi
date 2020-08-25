@@ -8,7 +8,7 @@ using webapi.Repositories;
 namespace webapi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("books")]
     public class BookController : ControllerBase
     {
         private IRepository<Book> bookRepository;
