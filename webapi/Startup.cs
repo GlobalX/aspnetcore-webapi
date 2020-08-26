@@ -37,12 +37,11 @@ namespace webapi
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IBookRepository, BookRepository>();
-            services.AddScoped<ISessionVariable, SessionVariable>();
-            services.AddSingleton<Func<IDbConnection>>(c =>
+            services.AddScoped<Func<IDbConnection>>(c =>
             {
                 return () =>
                 {
-                    var conn = new NpgsqlConnection("Host=192.168.1.115; Database=tenancytest; Username=appuser; Password=Welcome1");
+                    var conn = new MultiTenantNgpSqlConnection("Host=192.168.1.115; Database=tenancytest; Username=appuser; Password=Welcome1", c.GetRequiredService<TenantInfo>());
                     return conn;
                 };
             });

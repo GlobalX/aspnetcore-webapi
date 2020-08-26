@@ -10,15 +10,11 @@ namespace webapi.Repositories
 {
     public class BookRepository : IBookRepository
     {
-        private readonly ISessionVariable _sessionVariable;
         private readonly Func<IDbConnection> _createConnection;
-        private readonly TenantInfo _tenantInfo;
 
-        public BookRepository(ISessionVariable sessionVariable, Func<IDbConnection> createConnection, TenantInfo tenantInfo)
+        public BookRepository(Func<IDbConnection> createConnection)
         {
-            _sessionVariable = sessionVariable;
             _createConnection = createConnection;
-            _tenantInfo = tenantInfo;
         }
 
         public IEnumerable<Book> GetAll()
@@ -28,8 +24,6 @@ namespace webapi.Repositories
             using (var connection = _createConnection())
             {
                 connection.Open();
-
-                _sessionVariable.SetTenantIdIntoDatabaseSessionVariable(new NpgsqlCommand(), _tenantInfo, connection);
 
                 //get trust accounts
                 var books = connection.Query<Book>(sql);
