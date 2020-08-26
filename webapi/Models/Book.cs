@@ -7,6 +7,13 @@ namespace webapi.Models
     {
         public String Title { get; set; }
         public DateTime Year { get; set; }
-        public virtual Tenant Tenant { get; set; }
+
+        [ForeignKey("tenants")]
+        [Column("TenantId")]
+        public Guid TenantId { get; set; }
+        
+        [ForeignKey("authors")]
+        [Column("AuthorId")]
+        public Guid? AuthorId { get; set; }
     }
 }
