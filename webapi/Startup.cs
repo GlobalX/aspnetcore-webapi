@@ -31,6 +31,7 @@ namespace webapi
         {
             services.AddScoped<TenantInfo>();
             services.UseMultiTenancyPostgresInterceptor(Configuration); 
+            services.AddDbContext<DatabaseContext>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddControllers();
