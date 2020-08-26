@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using webapi.Models;
 using webapi.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using webapi.Infrastructure;
 
 namespace webapi
@@ -34,6 +36,16 @@ namespace webapi
             services.AddDbContext<DatabaseContext>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<ISessionVariable, SessionVariable>();
+            services.AddSingleton<Func<IDbConnection>>(c =>
+            {
+                return () =>
+                {
+                    var conn = new NpgsqlConnection("Host=192.168.1.115; Database=tenancytest; Username=appuser; Password=Welcome1");
+                    return conn;
+                };
+            });
             services.AddControllers();
         }
 

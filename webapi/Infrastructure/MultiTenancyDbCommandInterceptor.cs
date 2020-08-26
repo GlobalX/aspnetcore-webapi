@@ -18,13 +18,6 @@ namespace webapi.Infrastructure
             _tenantInfo = tenantInfo;
         }
 
-        public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result)
-        {
-            var postgresCommand = command as Npgsql.NpgsqlCommand;
-
-            return base.ReaderExecuted(command, eventData, result);
-        }
-
         public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
         {
             SetTenantOnQuery(command);

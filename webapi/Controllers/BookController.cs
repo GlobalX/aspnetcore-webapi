@@ -12,13 +12,10 @@ namespace webapi.Controllers
     [Route("books")]
     public class BookController : ControllerBase
     {
-        private readonly IRepository<Book> _bookRepository;
-        private readonly IRepository<Tenant> _tenantRepository;
-
-        public BookController(IRepository<Book> bookRepository, IRepository<Tenant> tenantRepository)
+        private readonly IBookRepository _bookRepository;
+        public BookController(IBookRepository bookRepository)
         {
             _bookRepository = bookRepository;
-            _tenantRepository = tenantRepository;
         }
 
         [HttpGet]
