@@ -1,8 +1,11 @@
 using System;
+using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Npgsql;
 
 namespace webapi.Infrastructure
 {
@@ -15,17 +18,16 @@ namespace webapi.Infrastructure
             _tenantInfo = tenantInfo;
         }
 
+        public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result)
+        {
+            var postgresCommand = command as Npgsql.NpgsqlCommand;
+
+            return base.ReaderExecuted(command, eventData, result);
+        }
+
         public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
         {
-            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}'; {command.CommandText}";
-            string query = command.CommandText;
-
-            foreach (DbParameter p in command.Parameters)
-            {
-                query = query.Replace(p.ParameterName, p.Value.ToString());
-            }
-            Console.WriteLine(query);
-
+            SetTenantOnQuery(command);
             return base.ReaderExecuting(command, eventData, result);
         }
 
@@ -34,65 +36,49 @@ namespace webapi.Infrastructure
             InterceptionResult<DbDataReader> result,
             CancellationToken cancellationToken = default)
         {
-            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}'; {command.CommandText}";
-            string query = command.CommandText;
-
-            foreach (DbParameter p in command.Parameters)
-            {
-                query = query.Replace(p.ParameterName, p.Value.ToString());
-            }
-            Console.WriteLine(query);
+            SetTenantOnQuery(command);
             return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
         }
 
         public override Task<InterceptionResult<int>> NonQueryExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<int> result,
             CancellationToken cancellationToken = new CancellationToken())
         {
-            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}'; {command.CommandText}";
-            string query = command.CommandText;
-
-            foreach (DbParameter p in command.Parameters)
-            {
-                query = query.Replace(p.ParameterName, p.Value.ToString());
-            }
-            Console.WriteLine(query);
+            SetTenantOnQuery(command);
             return base.NonQueryExecutingAsync(command, eventData, result, cancellationToken);
         }
 
         public override Task<InterceptionResult<object>> ScalarExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<object> result,
             CancellationToken cancellationToken = new CancellationToken())
         {
-            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}'; {command.CommandText}";
-            Console.WriteLine(command.CommandText);
-
+            SetTenantOnQuery(command);
             return base.ScalarExecutingAsync(command, eventData, result, cancellationToken);
         }
 
         public override InterceptionResult<object> ScalarExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<object> result)
         {
-            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}'; {command.CommandText}";
-            string query = command.CommandText;
-
-            foreach (DbParameter p in command.Parameters)
-            {
-                query = query.Replace(p.ParameterName, p.Value.ToString());
-            }
-            Console.WriteLine(query);
+            SetTenantOnQuery(command);
             return base.ScalarExecuting(command, eventData, result);
         }
 
         public override InterceptionResult<int> NonQueryExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<int> result)
         {
-            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}'; {command.CommandText}";
-
-            string query = command.CommandText;
-
-            foreach (DbParameter p in command.Parameters)
-            {
-                query = query.Replace(p.ParameterName, p.Value.ToString());
-            }
-            Console.WriteLine(query);
+            SetTenantOnQuery(command);
             return base.NonQueryExecuting(command, eventData, result);
+        }
+
+        private void SetTenantOnQuery(DbCommand command)
+        {
+            //TODO: Use the existing command rather than round-tripping again
+            var tenantCommand  = new NpgsqlCommand($"SET app.current_tenant = '{_tenantInfo.Id}';", (NpgsqlConnection) command.Connection)
+            {
+                CommandType = CommandType.Text
+            };
+            tenantCommand.ExecuteNonQuery();
+
+            var query = command.Parameters.Cast<DbParameter>().
+                Aggregate(command.CommandText, (current, p) => current.Replace(p.ParameterName, p.Value.ToString()));
+
+            Console.WriteLine(query);
         }
     }
 }

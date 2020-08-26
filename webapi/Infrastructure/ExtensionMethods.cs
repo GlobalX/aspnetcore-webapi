@@ -24,7 +24,7 @@ namespace webapi.Infrastructure
                         serviceProvider.GetRequiredService<TenantInfo>()); // Allows DI for tenant info, set by parent pipeline via middleware
                     efServices.AddScoped<IInterceptor, T>(); // Adds the interceptor
 
-                    var connectionString = "Host=localhost; Database=tenancytest; Username=appuser; Password=Welcome1";
+                    var connectionString = "Host=192.168.1.115; Database=tenancytest; Username=appuser; Password=Welcome1";
 
                     return new DbContextOptionsBuilder<DatabaseContext>()
                         .UseInternalServiceProvider(efServices.BuildServiceProvider())
