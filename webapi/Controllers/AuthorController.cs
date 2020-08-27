@@ -18,13 +18,13 @@ namespace webapi.Controllers
             { _authorRepository = authorRepository; }
 
         [HttpGet("")]
-        public IEnumerable<Author> GetAllAuthots() => _authorRepository.GetAll();
+        public async Task<IEnumerable<Author>> GetAllAuthors() => await _authorRepository.GetAllAsync();
 
         [HttpGet("{authorName}")]
-        public Task<Author> GetAuthorByName(String authorName) => _authorRepository.GetByName(authorName);
+        public async Task<Author> GetAuthorByName(String authorName) => await _authorRepository.GetByName(authorName);
 
         [HttpPost("")]
         [AllowAnonymous]
-        public void AddAuthor([FromBody] Author author) => _authorRepository.Insert(author);
+        public async Task AddAuthor([FromBody] Author author) => await _authorRepository.InsertAsync(author);
     }
 }
