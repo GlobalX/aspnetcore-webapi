@@ -19,7 +19,7 @@ namespace webapi.Repositories
 
         public IEnumerable<Book> GetAll()
         {
-            const string sql = "SELECT \"Id\", \"CreatedAt\", \"Title\", \"Year\", \"AuthorId\", \"TenantId\" FROM trust_views.books_vw;";
+            const string sql = "SELECT \"Id\", \"CreatedAt\", \"Title\", \"Year\", \"AuthorId\", \"TenantId\" FROM public.books;";
 
             using (var connection = _createConnection())
             {
