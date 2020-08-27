@@ -27,6 +27,7 @@ namespace webapi.Controllers
         [Route("")]
         public async Task<IEnumerable<Book>> GetAllBooks() => await _bookRepository.GetAllAsync();
 
+
         [HttpGet]
         [Route("{bookId}")]
         public async Task<Book> GetBookById(Guid bookId) => await _bookRepository.GetByIdAsync(bookId);
@@ -34,7 +35,7 @@ namespace webapi.Controllers
         [HttpPost]
         [Route("")]
         [AllowAnonymous]
-        public async Task AddBook([FromBody] Book book) => await _bookRepository.InsertAsync(book);
+        public async Task<Book> AddBook([FromBody] Book book) => await _bookRepository.InsertAsync(book);
         
 
         [HttpDelete]

@@ -58,12 +58,14 @@ namespace webapi.Repositories
             return await entities.SingleOrDefaultAsync(s => s.Id == id);
         }
 
-        public async Task InsertAsync(T entity)
+        public async Task<T> InsertAsync(T entity)
         {
             if (entity == null) throw new ArgumentNullException("entity");
 
             entities.Add(entity);
             await context.SaveChangesAsync();
+
+            return entity;
         }
 
         public async Task UpdateAsync(T entity)

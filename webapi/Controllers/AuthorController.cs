@@ -25,6 +25,6 @@ namespace webapi.Controllers
 
         [HttpPost("")]
         [AllowAnonymous]
-        public async Task AddAuthor([FromBody] Author author) => await _authorRepository.InsertAsync(author);
+        public async Task<Author> AddAuthor([FromBody] Author author) => await _authorRepository.InsertAsync(author);
     }
 }
