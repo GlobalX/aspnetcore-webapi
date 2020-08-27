@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using webapi.Models;
 using webapi.Repositories;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace webapi.Controllers
 {
@@ -23,23 +25,21 @@ namespace webapi.Controllers
 
         [HttpGet]
         [Route("")]
-        public IEnumerable<Book> GetAllBooks() => _bookRepository.GetAll();
+        public async Task<IEnumerable<Book>> GetAllBooks() => await _bookRepository.GetAllAsync();
 
         [HttpGet]
         [Route("{bookId}")]
-        public Book GetBookById(Guid bookId) => _bookRepository.GetById(bookId);
+        public async Task<Book> GetBookById(Guid bookId) => await _bookRepository.GetByIdAsync(bookId);
 
         [HttpPost]
         [Route("")]
         [AllowAnonymous]
-        public void AddBook([FromBody] Book book)
-        {
-            _bookRepository.Insert(book);
-        }
+        public async Task AddBook([FromBody] Book book) => await _bookRepository.InsertAsync(book);
+        
 
         [HttpDelete]
         [Route("{bookId}")]
         [AllowAnonymous]
-        public void DeleteBook(Guid bookId) => _bookRepository.Delete(bookId);
+        public async Task DeleteBook(Guid bookId) => await _bookRepository.DeleteAsync(bookId);
     }
 }

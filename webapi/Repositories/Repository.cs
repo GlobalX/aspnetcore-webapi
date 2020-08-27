@@ -22,10 +22,12 @@ namespace webapi.Repositories
         {
             return entities.AsEnumerable();
         }
+
         public T GetById(Guid id)
         {
            return entities.SingleOrDefault(s => s.Id == id);
         }
+
         public void Insert(T entity)
         {
             if (entity == null) throw new ArgumentNullException("entity");
@@ -45,6 +47,38 @@ namespace webapi.Repositories
             T entity = entities.SingleOrDefault(s => s.Id == id);
             entities.Remove(entity);
             context.SaveChanges();
+        }
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await entities.ToListAsync<T>();
+        }
+
+        public async Task<T> GetByIdAsync(Guid id)
+        {
+            return await entities.SingleOrDefaultAsync(s => s.Id == id);
+        }
+
+        public async Task InsertAsync(T entity)
+        {
+            if (entity == null) throw new ArgumentNullException("entity");
+
+            entities.Add(entity);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(T entity)
+        {
+            if (entity == null) throw new ArgumentNullException("entity");
+            await context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            if (id == null) throw new ArgumentNullException("entity");
+
+            T entity = entities.SingleOrDefault(s => s.Id == id);
+            entities.Remove(entity);
+            await context.SaveChangesAsync();
         }
 
         // public Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate)
