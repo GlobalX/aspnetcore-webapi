@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />
+    <PackageReference Include="dbup-postgresql" Version="4.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.7">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -22,5 +23,12 @@
   <ItemGroup>
     <Compile Remove="Controllers\WeatherForecastController.cs" />
     <Compile Remove="WeatherForecast.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\0002 - SeedData.sql" />
+    <None Remove="Migrations\InitialCreate.sql" />
+    <EmbeddedResource Include="Migrations\0001 - InitialCreate.sql" />
+    <None Remove="Migrations\0003 - Create Views.sql" />
+    <EmbeddedResource Include="Migrations\0003 - Create Views.sql" />
   </ItemGroup>
 </Project>

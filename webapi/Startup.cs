@@ -41,7 +41,7 @@ namespace webapi
             {
                 return () =>
                 {
-                    var conn = new MultiTenantNgpSqlConnection("Host=192.168.1.115; Database=tenancytest; Username=appuser; Password=Welcome1", c.GetRequiredService<TenantInfo>());
+                    var conn = new MultiTenantNgpSqlConnection("Host=192.168.1.115; Database=tenancytestviews; Username=appuser; Password=Welcome1", c.GetRequiredService<TenantInfo>());
                     return conn;
                 };
             });
