@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using webapi.Models;
@@ -20,7 +21,12 @@ namespace webapi.Controllers
 
         [HttpGet]
         [Route("")]
-        public IEnumerable<Book> GetAllBooks() => _bookRepository.GetAll();
+        public IEnumerable<Book> GetAllBooks()
+        {
+            var results = _bookRepository.GetAll();
+
+            return new List<Book>() { results.First() };
+        }
 
         [HttpGet]
         [Route("{bookId}")]
@@ -29,9 +35,12 @@ namespace webapi.Controllers
         [HttpPost]
         [Route("")]
         [AllowAnonymous]
-        public void AddBook([FromBody] Book book)
+        public object AddBook([FromBody] Book book)
         {
+            book.Id = Guid.NewGuid();
             _bookRepository.Insert(book);
+
+            return new {Id = book.Id};
         }
 
         [HttpDelete]
