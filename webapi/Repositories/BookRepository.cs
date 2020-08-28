@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Dapper;
 using Npgsql;
 using webapi.Infrastructure;
@@ -34,7 +35,18 @@ namespace webapi.Repositories
 
         public Book GetById(Guid id)
         {
-            throw new NotImplementedException();
+            const string sql = "SELECT \"Id\", \"CreatedAt\", \"Title\", \"Year\", \"AuthorId\", \"TenantId\" FROM public.books WHERE \"Id\" = @Id;";
+            var parameters = new { Id = id };
+
+            using (var connection = _createConnection())
+            {
+                connection.Open();
+
+                var book = connection.Query<Book>(sql, parameters).FirstOrDefault();
+                connection.Close();
+
+                return book;
+            }
         }
 
         public void Insert(Book entity)
