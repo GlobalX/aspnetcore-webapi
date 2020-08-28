@@ -15,31 +15,31 @@ namespace webapi
     {
         public static int Main(string[] args)
         {
-//            const string connectionString = "Host=192.168.1.115; Database=tenancytestviews; Username=postgres; Password=Welcome1";
-//             EnsureDatabase.For.PostgresqlDatabase(connectionString);
-//             var upgrader =
-//                 DeployChanges.To
-//                     .PostgresqlDatabase(connectionString)
-//                     .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
-//                     .LogToConsole()
-//                     .Build();
-//
-//             var result = upgrader.PerformUpgrade();
-//
-//             if (!result.Successful)
-//             {
-//                 Console.ForegroundColor = ConsoleColor.Red;
-//                 Console.WriteLine(result.Error);
-//                 Console.ResetColor();
-// #if DEBUG
-//                 Console.ReadLine();
-// #endif                
-//                 return -1;
-//             }
-//
-//             Console.ForegroundColor = ConsoleColor.Green;
-//             Console.WriteLine("Success!");
-//             Console.ResetColor();
+           const string connectionString = "Host=192.168.1.115; Database=tenancytest; Username=postgres; Password=Welcome1";
+            EnsureDatabase.For.PostgresqlDatabase(connectionString);
+            var upgrader =
+                DeployChanges.To
+                    .PostgresqlDatabase(connectionString)
+                    .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+                    .LogToConsole()
+                    .Build();
+
+            var result = upgrader.PerformUpgrade();
+
+            if (!result.Successful)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Error);
+                Console.ResetColor();
+#if DEBUG
+                Console.ReadLine();
+#endif                
+                return -1;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Success!");
+            Console.ResetColor();
             CreateHostBuilder(args).Build().Run();
             return 0;
         }

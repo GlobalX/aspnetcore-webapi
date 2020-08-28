@@ -1,17 +1,40 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using webapi.Models;
 
 namespace webapi.Repositories
 {
-    public class AuthorRepository : Repository<Author>, IAuthorRepository
+    public class AuthorRepository : IAuthorRepository
     {
-        public AuthorRepository(DatabaseContext context) : base(context) { }
-
         public Task<Author> GetByName(string name)
         {
-            return context.Set<Author>().FirstOrDefaultAsync(author => author.Name == name);
-            // return FirstOrDefault(author => author.Name == name);
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Author> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Author GetById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Insert(Author entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(Author entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
