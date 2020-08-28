@@ -59,7 +59,7 @@ namespace webapi.Repositories
 
         public void Delete(Guid id)
         {
-            const string sql = "DELETE FROM public.books_vw WHERE \"Id\" = @Id;";
+            const string sql = "DELETE FROM public.books WHERE \"Id\" = @Id;";
             var parameters = new { Id = id };
 
             using (var connection = _createConnection())
