@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,14 +9,26 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace webapi
 {
     public class Program
     {
+        public static IConfigurationRoot Configuration;
+
         public static int Main(string[] args)
         {
-           const string connectionString = "Host=192.168.1.115; Database=tenancytest; Username=postgres; Password=Welcome1";
+            // Set up configuration sources.
+            var builder = new ConfigurationBuilder()
+                                .SetBasePath(Path.Combine(AppContext.BaseDirectory))
+                                .AddJsonFile("appsettings.json", optional: true);
+
+            Configuration = builder.Build();
+            var connectionString = string.Format(Configuration.GetConnectionString("TenancyTest-Admin"),
+                                                 Configuration["DBHost"],
+                                                 Configuration["AdminPassword"]);
+
             EnsureDatabase.For.PostgresqlDatabase(connectionString);
             var upgrader =
                 DeployChanges.To
