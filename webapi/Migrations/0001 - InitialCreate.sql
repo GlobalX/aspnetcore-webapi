@@ -19,6 +19,15 @@ ALTER TABLE public.tenants
 ALTER TABLE public.tenants
     ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+  CREATE USER AppUser WITH PASSWORD 'Welcome1';
+  EXCEPTION WHEN DUPLICATE_OBJECT THEN
+  RAISE NOTICE 'not creating user AppUser -- it already exists';
+END
+$$;
+
+
 GRANT ALL ON TABLE public.tenants TO appuser;
 
 GRANT ALL ON TABLE public.tenants TO postgres;
