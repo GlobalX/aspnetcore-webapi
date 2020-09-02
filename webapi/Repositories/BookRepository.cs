@@ -20,7 +20,7 @@ namespace webapi.Repositories
 
         public IEnumerable<Book> GetAll()
         {
-            const string sql = "SELECT \"Id\", \"CreatedAt\", \"Title\", \"Year\", \"AuthorId\", \"TenantId\" FROM public.books;";
+            const string sql = "SELECT book_Id, created_at, title, year, author_id, tenant_id FROM public.books;";
 
             using (var connection = _createConnection())
             {
@@ -35,7 +35,7 @@ namespace webapi.Repositories
 
         public Book GetById(Guid id)
         {
-            const string sql = "SELECT \"Id\", \"CreatedAt\", \"Title\", \"Year\", \"AuthorId\", \"TenantId\" FROM public.books WHERE \"Id\" = @Id;";
+            const string sql = "SELECT book_Id, created_at, title, year, author_id, tenant_id FROM public.books WHERE book_id = @Id;";
             var parameters = new { Id = id };
 
             using (var connection = _createConnection())
@@ -51,7 +51,7 @@ namespace webapi.Repositories
 
         public void Insert(Book entity)
         {
-            const string sql = "INSERT INTO public.books(\"Id\", \"TenantId\", \"Title\", \"Year\", \"CreatedAt\", \"AuthorId\")" +
+            const string sql = "INSERT INTO public.books(book_Id, tenant_id, title, year, created_at, author_id)" +
                                "VALUES(@Id, @TenantId, @Title, @Year, current_timestamp, @AuthorId);";
             var parameters = new { Id = entity.Id, TenantId = entity.TenantId, Title = entity.Title, Year = entity.Year, AuthorId = entity.AuthorId };
 
@@ -69,10 +69,10 @@ namespace webapi.Repositories
             throw new NotImplementedException();
         }
 
-        public void Delete(Guid id)
+        public void Delete(Guid bookId)
         {
-            const string sql = "DELETE FROM public.books WHERE \"Id\" = @Id;";
-            var parameters = new { Id = id };
+            const string sql = "DELETE FROM public.books WHERE book_id = @Id;";
+            var parameters = new { Id = bookId };
 
             using (var connection = _createConnection())
             {
