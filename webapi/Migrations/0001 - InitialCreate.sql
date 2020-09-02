@@ -30,10 +30,7 @@ $$;
 
 GRANT ALL ON TABLE public.tenants TO appuser;
 
-GRANT ALL ON TABLE public.tenants TO postgres;
 -- POLICY: tenant_isolation_policy
-
--- DROP POLICY tenant_isolation_policy ON public.tenants;
 
 CREATE POLICY tenant_isolation_policy
     ON public.tenants
@@ -41,6 +38,8 @@ CREATE POLICY tenant_isolation_policy
     FOR ALL
     TO public
     USING (("Id" = (current_setting('app.current_tenant'::text))::uuid));
+
+-- DROP POLICY tenant_isolation_policy ON public.tenants;
 
 CREATE TABLE public.authors
 (
@@ -60,8 +59,6 @@ ALTER TABLE public.authors
 -- may need to consider EXECUTE and USAGE later down the track
 -- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.authors TO appuser;
-
-GRANT ALL ON TABLE public.authors TO postgres;
 
 -- Table: public.books
 
@@ -99,7 +96,6 @@ ALTER TABLE public.books
 -- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.books TO appuser;
 
-GRANT ALL ON TABLE public.books TO postgres;
 -- Index: IX_books_AuthorId
 
 -- DROP INDEX public."IX_books_AuthorId";
