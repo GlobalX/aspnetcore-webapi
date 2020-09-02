@@ -56,7 +56,10 @@ CREATE TABLE public.authors
 ALTER TABLE public.authors
     OWNER to postgres;
 
-GRANT ALL ON TABLE public.authors TO appuser;
+-- Grant only select/insert/update/delete
+-- may need to consider EXECUTE and USAGE later down the track
+-- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.authors TO appuser;
 
 GRANT ALL ON TABLE public.authors TO postgres;
 
@@ -91,7 +94,10 @@ ALTER TABLE public.books
 ALTER TABLE public.books
     ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE public.books TO appuser;
+-- Grant only select/insert/update/delete
+-- may need to consider EXECUTE and USAGE later down the track
+-- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.books TO appuser;
 
 GRANT ALL ON TABLE public.books TO postgres;
 -- Index: IX_books_AuthorId
