@@ -1,7 +1,28 @@
-﻿-- Table: public.tenants
+﻿
 
--- DROP TABLE public.tenants;
+-- Create a role group which will contain the app user account. 
+-- This role group allows management of access privileges in a single location. 
+-- We will later apply select, insert, update, delete command access on all multi-tenanted tables for this role group.
+DO $$
+BEGIN
+  CREATE ROLE tenancy_users WITH NOLOGIN;
+  EXCEPTION WHEN DUPLICATE_OBJECT THEN
+  RAISE NOTICE 'not creating role tenancy_users -- it already exists';
+END
+$$;
 
+-- Create the app_user user
+DO $$
+BEGIN
+  CREATE USER app_user WITH PASSWORD 'Welcome1';
+  EXCEPTION WHEN DUPLICATE_OBJECT THEN
+  RAISE NOTICE 'not creating user app_user -- it already exists';
+  -- Add this user to the tenancy_group role
+  GRANT tenancy_users TO app_user;
+END
+$$;
+
+-- Table: public.tenants
 CREATE TABLE public.tenants
 (
     "Id" uuid NOT NULL,
@@ -19,16 +40,7 @@ ALTER TABLE public.tenants
 ALTER TABLE public.tenants
     ENABLE ROW LEVEL SECURITY;
 
-DO $$
-BEGIN
-  CREATE USER AppUser WITH PASSWORD 'Welcome1';
-  EXCEPTION WHEN DUPLICATE_OBJECT THEN
-  RAISE NOTICE 'not creating user AppUser -- it already exists';
-END
-$$;
-
-
-GRANT ALL ON TABLE public.tenants TO appuser;
+GRANT SELECT ON TABLE public.tenants TO tenancy_users;
 
 -- POLICY: tenant_isolation_policy
 
@@ -57,8 +69,8 @@ ALTER TABLE public.authors
 
 -- Grant only select/insert/update/delete
 -- may need to consider EXECUTE and USAGE later down the track
--- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.authors TO appuser;
+-- ALL shouldn't be used as Truncate is outside of RLS boundary, and ALTER TABLE can disable RLS, see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.authors TO tenancy_users;
 
 -- Table: public.books
 
@@ -94,7 +106,7 @@ ALTER TABLE public.books
 -- Grant only select/insert/update/delete
 -- may need to consider EXECUTE and USAGE later down the track
 -- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.books TO appuser;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.books TO tenancy_users;
 
 -- Index: IX_books_AuthorId
 
@@ -116,9 +128,12 @@ CREATE INDEX "IX_books_TenantId"
 
 -- DROP POLICY tenant_book_isolation_policy ON public.books;
 
+
+-- policies need to be applied per table
+
 CREATE POLICY tenant_book_isolation_policy
     ON public.books
     AS PERMISSIVE
     FOR ALL
-    TO public
+    TO public -- apply this polcity to all roles/users
     USING (("TenantId" = (current_setting('app.current_tenant'::text))::uuid));
