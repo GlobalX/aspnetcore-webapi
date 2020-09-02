@@ -5,6 +5,7 @@ namespace webapi.Models
 {
     public class Book : BaseEntity
     {
+        public long BookNumber { get; set; }
         public String Title { get; set; }
         public DateTime Year { get; set; }
 
@@ -14,6 +15,6 @@ namespace webapi.Models
         
         [ForeignKey("authors")]
         [Column("AuthorId")]
-        public Guid? AuthorId { get; set; }
+        public int AuthorId { get; set; }
     }
 }

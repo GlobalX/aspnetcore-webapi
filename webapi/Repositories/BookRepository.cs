@@ -20,7 +20,7 @@ namespace webapi.Repositories
 
         public IEnumerable<Book> GetAll()
         {
-            const string sql = "SELECT book_Id, created_at, title, year, author_id, tenant_id FROM public.books;";
+            const string sql = "SELECT book_Id as Id, book_number BookNumber, created_at as CreatedAt, title, year, author_id as AuthorId, tenant_id as TenantId FROM public.books;";
 
             using (var connection = _createConnection())
             {
@@ -35,7 +35,7 @@ namespace webapi.Repositories
 
         public Book GetById(Guid id)
         {
-            const string sql = "SELECT book_Id, created_at, title, year, author_id, tenant_id FROM public.books WHERE book_id = @Id;";
+            const string sql = "SELECT book_Id as Id, book_number BookNumber, created_at as CreatedAt, title, year, author_id as AuthorId, tenant_id as TenantId FROM public.books WHERE book_id = @Id;";
             var parameters = new { Id = id };
 
             using (var connection = _createConnection())
@@ -51,9 +51,11 @@ namespace webapi.Repositories
 
         public void Insert(Book entity)
         {
-            const string sql = "INSERT INTO public.books(book_Id, tenant_id, title, year, created_at, author_id)" +
-                               "VALUES(@Id, @TenantId, @Title, @Year, current_timestamp, @AuthorId);";
-            var parameters = new { Id = entity.Id, TenantId = entity.TenantId, Title = entity.Title, Year = entity.Year, AuthorId = entity.AuthorId };
+            const string sql = "INSERT INTO public.books(book_Id, book_number, tenant_id, title, year, created_at, author_id)" +
+                               "VALUES(@Id, nextval(@TenantBookSequence), @TenantId, @Title, @Year, current_timestamp, @AuthorId);";
+            var parameters = new {  Id = entity.Id, TenantId = entity.TenantId, 
+                                    TenantBookSequence = entity.TenantId.ToString().Replace("-", "") + "_books_book_id_seq", 
+                                    Title = entity.Title, Year = entity.Year, AuthorId = entity.AuthorId };
 
             using (var connection = _createConnection())
             {

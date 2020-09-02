@@ -47,10 +47,9 @@ CREATE POLICY tenant_isolation_policy
     TO public
     USING ((tenant_id = (current_setting('app.current_tenant'::text))::uuid));
 
--- DROP POLICY tenant_isolation_policy ON public.tenants;
 
 CREATE TABLE public.authors (
-    author_id uuid PRIMARY KEY,
+    author_id SERIAL PRIMARY KEY, -- authors are global and not multi-tenanted; a sequential integer index is suitable. serial = 32bit int = 4.294 billion authors    
     created_at timestamptz NOT NULL,
     name text,
     country text    
@@ -65,45 +64,30 @@ ALTER TABLE public.authors
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.authors TO tenancy_users;
 
 CREATE TABLE public.books (
-    book_id uuid PRIMARY KEY,
+    book_id uuid NOT NULL, 
+    book_number bigint NOT NULL,
     created_at timestamptz NOT NULL,
     title text,
     year timestamptz NOT NULL,
-    author_id uuid REFERENCES public.authors(author_id),
-    tenant_id uuid REFERENCES public.tenants(tenant_id)  
+    author_id int REFERENCES public.authors(author_id),
+    tenant_id uuid REFERENCES public.tenants(tenant_id),
+    PRIMARY KEY (tenant_id, book_number),  
+    UNIQUE (book_id)
 );
 
-ALTER TABLE public.books
-    OWNER to postgres;
+-- Create additional indexes that will speed up expected queries
+CREATE INDEX books_tenant_id_fkey ON public.books USING btree (tenant_id);
+-- Each index needs to include the tenant_id as a composite key
+CREATE INDEX books_author_id_fkey ON public.books USING btree (tenant_id, author_id);
 
-ALTER TABLE public.books
-    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;
 
 -- Grant only select/insert/update/delete
 -- may need to consider EXECUTE and USAGE later down the track
 -- ALL shouldn't be used as Truncate is outside of RLS boundary see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.books TO tenancy_users;
 
--- Index: IX_books_AuthorId
--- DROP INDEX public."IX_books_AuthorId";
-
-CREATE INDEX "IX_books_AuthorId"
-    ON public.books USING btree
-        (author_id ASC NULLS LAST);
-
--- Index: IX_books_TenantId
--- DROP INDEX public."IX_books_TenantId";
-
-CREATE INDEX "IX_books_TenantId"
-    ON public.books USING btree
-        (tenant_id ASC NULLS LAST);
--- POLICY: tenant_book_isolation_policy
-
--- DROP POLICY tenant_book_isolation_policy ON public.books;
-
-
 -- policies need to be applied per table
-
 CREATE POLICY tenant_book_isolation_policy
     ON public.books
     AS PERMISSIVE
