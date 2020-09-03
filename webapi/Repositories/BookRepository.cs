@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
 using webapi.Infrastructure;
@@ -85,6 +86,31 @@ namespace webapi.Repositories
 
                 return;
             }
+        }
+
+        public Task<IEnumerable<Book>> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Book> GetByIdAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InsertAsync(Book entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAsync(Book entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAsync(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

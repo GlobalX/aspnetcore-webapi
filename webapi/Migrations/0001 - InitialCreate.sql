@@ -1,4 +1,4 @@
-﻿
+﻿-- Create the initial schema of the application
 
 -- Create a role group which will contain the app user account. 
 -- This role group allows management of access privileges in a single location. 
@@ -22,7 +22,7 @@ BEGIN
 END
 $$;
 
--- Table: public.tenants
+-- Table: Tenants
 CREATE TABLE public.tenants (
     tenant_id uuid PRIMARY KEY,
     created_at timestamptz NOT NULL,
@@ -30,15 +30,9 @@ CREATE TABLE public.tenants (
     status text
 );    
 
-ALTER TABLE public.tenants
-    OWNER to postgres;
-
-ALTER TABLE public.tenants
-    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT ON TABLE public.tenants TO tenancy_users;
-
--- POLICY: tenant_isolation_policy
 
 CREATE POLICY tenant_isolation_policy
     ON public.tenants
@@ -48,21 +42,29 @@ CREATE POLICY tenant_isolation_policy
     USING ((tenant_id = (current_setting('app.current_tenant'::text))::uuid));
 
 
+-- Table: Authors
 CREATE TABLE public.authors (
-    author_id SERIAL PRIMARY KEY, -- authors are global and not multi-tenanted; a sequential integer index is suitable. serial = 32bit int = 4.294 billion authors    
+    author_id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- authors are global and not multi-tenanted; a sequential integer index is suitable. serial = 32bit int = 4.294 billion authors    
     created_at timestamptz NOT NULL,
     name text,
     country text    
 );
-
-ALTER TABLE public.authors
-    OWNER to postgres;
 
 -- Grant only select/insert/update/delete
 -- may need to consider EXECUTE and USAGE later down the track
 -- ALL shouldn't be used as Truncate is outside of RLS boundary, and ALTER TABLE can disable RLS, see: https://www.postgresql.org/docs/9.5/ddl-rowsecurity.html
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.authors TO tenancy_users;
 
+-- Table: Genres
+CREATE TABLE genres
+(
+    genre_id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text  
+);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.genres TO tenancy_users;
+
+-- Table: Books
 CREATE TABLE public.books (
     book_id uuid NOT NULL, 
     book_number bigint NOT NULL,
@@ -71,6 +73,7 @@ CREATE TABLE public.books (
     year timestamptz NOT NULL,
     author_id int REFERENCES public.authors(author_id),
     tenant_id uuid REFERENCES public.tenants(tenant_id),
+    genre_id int REFERENCES public.genres(genre_id),
     PRIMARY KEY (tenant_id, book_number),  
     UNIQUE (book_id)
 );

@@ -5,18 +5,18 @@ using webapi.Models;
 
 namespace webapi.Repositories
 {
-    public interface IRepository<T> where T : BaseEntity
+    public interface ISequenceRepository<T> where T : BaseSequenceEntity
     {
         IEnumerable<T> GetAll();
-        T GetById(Guid id);
+        T GetById(int id);
         void Insert(T entity);
         void Update(T entity);
-        void Delete(Guid id);
+        void Delete(int id);
 
         Task<IEnumerable<T>> GetAllAsync();
-        Task<T> GetByIdAsync(Guid id);
+        Task<T> GetByIdAsync(int id);
         Task InsertAsync(T entity);
         Task UpdateAsync(T entity);
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(int id);
     }
 }

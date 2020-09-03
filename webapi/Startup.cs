@@ -7,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using webapi.Repositories;
 using webapi.Infrastructure;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
+using Scrutor;
 
 namespace webapi
 {
@@ -23,8 +27,13 @@ namespace webapi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<TenantInfo>();
-            services.AddScoped<IAuthorRepository, AuthorRepository>();
-            services.AddScoped<IBookRepository, BookRepository>();
+
+            services.Scan(scan => scan
+                .FromCallingAssembly()
+                .AddClasses(classes => classes.Where(type => type.Namespace.EndsWith("Repositories")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+
             services.AddScoped<Func<IDbConnection>>(c =>
             {
                 return () =>
