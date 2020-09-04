@@ -47,8 +47,11 @@ CREATE TABLE public.authors (
     author_id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- authors are global and not multi-tenanted; a sequential integer index is suitable. serial = 32bit int = 4.294 billion authors    
     created_at timestamptz NOT NULL,
     name text,
-    country text    
+    country text,
+    birth_date date
 );
+
+CREATE INDEX authors_name_idx ON public.authors USING btree (name);
 
 -- Grant only select/insert/update/delete
 -- may need to consider EXECUTE and USAGE later down the track

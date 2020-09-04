@@ -35,6 +35,7 @@ namespace webapi
                     .PostgresqlDatabase(connectionString)
                     .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
                     .LogToConsole()
+                    .WithExecutionTimeout(new TimeSpan(0,10,0))
                     .Build();
 
             var result = upgrader.PerformUpgrade();
