@@ -18,8 +18,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\0002 - SeedData.sql" />
+    <None Remove="Migrations\0003 - SeedLoadTestData.sql" />
     <None Remove="Migrations\InitialCreate.sql" />
     <EmbeddedResource Include="Migrations\0001 - InitialCreate.sql" />
+    <EmbeddedResource Include="Migrations\0003 - SeedLoadTestData.sql" />
     <None Remove="Migrations\0003 - Create Views.sql" />
   </ItemGroup>
 </Project>

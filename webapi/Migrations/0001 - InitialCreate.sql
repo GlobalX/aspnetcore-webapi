@@ -70,10 +70,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.genres TO tenancy_users;
 -- Table: Books
 CREATE TABLE public.books (
     book_id uuid NOT NULL, 
-    book_number bigint NOT NULL,
+    book_number int NOT NULL,
     created_at timestamptz NOT NULL,
     title text,
-    year timestamptz NOT NULL,
+    year date NOT NULL,
     author_id int REFERENCES public.authors(author_id),
     tenant_id uuid REFERENCES public.tenants(tenant_id),
     genre_id int REFERENCES public.genres(genre_id),
