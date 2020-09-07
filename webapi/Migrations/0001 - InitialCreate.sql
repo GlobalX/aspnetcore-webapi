@@ -91,6 +91,9 @@ CREATE INDEX books_tenant_id_fkey ON public.books USING btree (tenant_id);
 -- Each index needs to include the tenant_id as a composite key
 CREATE INDEX books_author_id_fkey ON public.books USING btree (tenant_id, author_id);
 
+-- cluster physical data storage by tenant_id index. All books for a given tenant should be stored next to each other on disk
+ALTER TABLE books CLUSTER ON books_tenant_id_fkey;
+
 ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;
 
 -- Grant only select/insert/update/delete

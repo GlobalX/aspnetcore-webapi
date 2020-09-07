@@ -50,13 +50,14 @@ namespace webapi.Repositories
             }
         }
 
-        public void Insert(Book entity)
+        public Guid Insert(Book entity)
         {
-            const string sql = "INSERT INTO public.books(book_Id, book_number, tenant_id, title, year, created_at, author_id)" +
-                               "VALUES(@Id, nextval(@TenantBookSequence), @TenantId, @Title, @Year, current_timestamp, @AuthorId);";
-            var parameters = new {  Id = entity.Id, TenantId = entity.TenantId, 
-                                    TenantBookSequence = entity.TenantId.ToString().Replace("-", "") + "_books_book_id_seq", 
-                                    Title = entity.Title, Year = entity.Year, AuthorId = entity.AuthorId };
+            const string sql = "INSERT INTO public.books(book_Id, book_number, tenant_id, title, year, created_at, author_id, genre_id)" +
+                               "VALUES(@Id, nextval(@TenantBookSequence), @TenantId, @Title, @Year, current_timestamp, @AuthorId, @GenreId);";
+            var newBookId = Guid.NewGuid();
+            var parameters = new {  Id = newBookId, TenantId = entity.TenantId, 
+                                    TenantBookSequence = "books_" + entity.TenantId.ToString().Replace("-", "") + "_book_id_seq", 
+                                    Title = entity.Title, Year = entity.Year, AuthorId = entity.AuthorId, GenreId = entity.GenreId };
 
             using (var connection = _createConnection())
             {
@@ -64,6 +65,7 @@ namespace webapi.Repositories
 
                 var book = connection.Execute(sql, parameters);
                 connection.Close();
+                return newBookId;
             }
         }
 

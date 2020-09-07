@@ -16,5 +16,9 @@ namespace webapi.Models
         [ForeignKey("authors")]
         [Column("AuthorId")]
         public int AuthorId { get; set; }
+
+        [ForeignKey("genres")]
+        [Column("GenreId")]
+        public int GenreId { get; set; }
     }
 }

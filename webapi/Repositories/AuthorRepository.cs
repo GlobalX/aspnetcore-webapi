@@ -22,7 +22,7 @@ namespace webapi.Repositories
             throw new NotImplementedException();
         }
 
-        public void Insert(Author entity)
+        public Guid Insert(Author entity)
         {
             throw new NotImplementedException();
         }

@@ -22,4 +22,6 @@ docker run --rm --name pg-docker -v /your/temp/dir:/tmp -v /your/db/data/dir:/va
 
 - Update the DBHost in appsettings.json to your local ip
 - Update the AdminPassword in appsettings.json to your postgres user password
+- Copy files in scriptes/sample-data into your mapped /tmp directory 
 - Run the app in VS Code/VS/Rider
+	* The web app's tenant ID is hard-coded in `TenantInfoMiddleware` 

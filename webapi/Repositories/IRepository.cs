@@ -9,7 +9,7 @@ namespace webapi.Repositories
     {
         IEnumerable<T> GetAll();
         T GetById(Guid id);
-        void Insert(T entity);
+        Guid Insert(T entity);
         void Update(T entity);
         void Delete(Guid id);
 

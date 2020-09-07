@@ -38,9 +38,9 @@ namespace webapi.Controllers
         public object AddBook([FromBody] Book book)
         {
             book.Id = Guid.NewGuid();
-            _bookRepository.Insert(book);
+            var newBookId = _bookRepository.Insert(book);
 
-            return new {Id = book.Id};
+            return new {Id = newBookId };
         }
 
         [HttpDelete]
