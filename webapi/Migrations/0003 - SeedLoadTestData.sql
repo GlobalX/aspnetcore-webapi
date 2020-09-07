@@ -10,6 +10,15 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+create or replace function true_random() returns double precision
+as $$
+BEGIN
+	RETURN 
+		select random() as v1
+		FROM generate_series(0,1);
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION random_timestamp_between_dates(
     start_date timestamp,
 	end_date timestamp
@@ -28,9 +37,7 @@ $$ LANGUAGE plpgsql;
 
 create extension if not exists "uuid-ossp";
 
-
-
--- insert 10k tenants
+-- insert 1k tenants
 with simul_tenants_data as (
 	select
 		uuid_generate_v4() as tenant_id,
@@ -84,19 +91,26 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO tenancy_users;
 
 -- authors seed setup
 
-create temp table if not exists first_names(first_name text);
+create temp table if not exists first_names(
+	id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	first_name text);
 copy
 	first_names(first_name)
 FROM 
     '/tmp/30k_first_names.csv';
 
-create temp table if not exists last_names(last_name text);
+create temp table if not exists last_names(
+	id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	last_name text);
 copy
 	last_names(last_name)
 FROM 
     '/tmp/30k_last_names.csv';
 
-create temp table if not exists countries(name text);
+create temp table if not exists countries(
+	id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name text
+	);
 copy
 	countries(name)
 FROM 
@@ -115,28 +129,35 @@ BEGIN
 		(select
 			name
 		from
-			countries TABLESAMPLE SYSTEM_ROWS (1));
+			countries
+		order by
+			true_random()
+		limit 1);
 END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION random_author_name()
 RETURNS text AS $$
 DECLARE
-
+	random_row_id int := round(random()*(30000-1) + 1);
 BEGIN
 
     RETURN 
 		(select
 			first_name
-		from
-			first_names TABLESAMPLE SYSTEM_ROWS (1)) 
+		from 
+			first_names
+		where
+			id = random_row_id)
 		 ||
 		 ' '
 		 ||
 		(select
 			last_name
 		from
-			last_names TABLESAMPLE SYSTEM_ROWS (1)) ;
+			last_names 
+		where
+			id = random_row_id);
 END
 $$ LANGUAGE plpgsql;
 
@@ -158,18 +179,27 @@ end;
 $$ LANGUAGE plpgsql;	
 
 
-do $$
-begin
-for r in 1..1000 loop
-		insert into 
-				public.authors (created_at, birth_date, name, country)
-		select 
-			*
-		from
-			create_1k_authors_rows();
-end loop;
-end;
-$$;
+CREATE or REPLACE PROCEDURE bulk_load_authors()
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+	 start_num int;
+    BEGIN
+		for r in 1..1000 loop
+				insert into 
+					public.authors (created_at, birth_date, name, country)
+				select 
+					*
+				from
+					create_1k_authors_rows();
+				COMMIT;
+		end loop;
+    END;
+	$$;
+	
+	
+CALL bulk_load_authors();
+
 
 
 -- books seed setup
@@ -201,53 +231,35 @@ CREATE TRIGGER ins_books_trig BEFORE INSERT ON books
 
 
 CREATE OR REPLACE FUNCTION random_tenant_id()
-RETURNS text AS $$
+RETURNS uuid AS $$
 DECLARE
-
+	random_row_id int := round(random()*(1000-1) + 1);
 BEGIN
 
     RETURN 
 		(select
 			tenant_id
 		from
-			public.tenants TABLESAMPLE SYSTEM_ROWS (1));
+			public.tenants 
+		where 
+			tenant_number = random_row_id);
 END
 $$ LANGUAGE plpgsql;
 
 
--- int return type causes the randomness to dissapear. todo
 CREATE OR REPLACE FUNCTION random_author_id()
-RETURNS text AS $$
-DECLARE
-
+	RETURNS double precision AS $$
 BEGIN
-
-    RETURN 
-		(select
-			author_id::text
-		from
-			public.authors TABLESAMPLE SYSTEM_ROWS (1));
+	RETURN select round(random()*(1000000-1) + 1);
 END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION random_genre_id()
-RETURNS text AS $$
-DECLARE
-
+	RETURNS double precision AS $$
 BEGIN
-
-    RETURN 
-		(select
-			genre_id::text
-		from
-			public.genres 
-		order by
-			random()
-		limit 1);
+	RETURN select round(random()*(56-1) + 1);
 END
 $$ LANGUAGE plpgsql;
-
-
 
 
 create or replace function create_1k_books_rows(start_index int)
@@ -265,7 +277,7 @@ begin
 
 	return query
 			select
-				random_tenant_id()::uuid as tenant_id,
+				random_tenant_id() as tenant_id,
 				uuid_generate_v4() as book_id,
 				2147483646 as book_number,
 				random_timestamp_between_dates('2020-01-01 00:00:00'::timestamp, '2020-10-01 00:00:00'::timestamp) as created_at,
@@ -279,16 +291,27 @@ end;
 $$ LANGUAGE plpgsql;	
 
 
-do $$
-begin
-for r in 1..10000 loop
-		insert into 
-			public.books (tenant_id, book_id, book_number, created_at, title, year, author_id, genre_id)
-		select 
-			*
-		from
-			create_1k_books_rows((r*1000)-1000);
-end loop;
-end;
-$$;
+
+CREATE or REPLACE PROCEDURE bulk_load_1m_books()
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+     r RECORD;
+	 start_num int;
+    BEGIN
+		for r in 1..100000 loop
+			if (r = 1) then start_num := 1; else start_num := r+1000; end if;
+				insert into 
+					public.books (tenant_id, book_id, book_number, created_at, title, year, author_id, genre_id)
+				select 
+					*
+				from
+					create_1k_books_rows(start_num);
+				COMMIT; -- requires pg >= 12
+		end loop;
+    END;
+	$$;
+	
+	
+CALL bulk_load_1m_books();
 

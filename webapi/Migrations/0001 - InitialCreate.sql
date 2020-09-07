@@ -22,13 +22,18 @@ BEGIN
 END
 $$;
 
+CREATE SEQUENCE tenants_tenant_number_seq;
+
 -- Table: Tenants
 CREATE TABLE public.tenants (
     tenant_id uuid PRIMARY KEY,
+    tenant_number int DEFAULT nextval('tenants_tenant_number_seq'),
     created_at timestamptz NOT NULL,
     name text,
     status text
-);    
+);  
+
+CREATE INDEX tenants_tenant_number_idx ON public.tenants USING btree (tenant_number);
 
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 
