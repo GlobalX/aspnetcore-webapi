@@ -56,7 +56,7 @@ $$ LANGUAGE plpgsql;
 
 SELECT create_books_sequence_for_large_tenants();
 
-
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO tenancy_users;
 
 
 CREATE OR REPLACE FUNCTION create_1k_books_rows_with_tenant_id(start_index int, provided_tenant_id text)
