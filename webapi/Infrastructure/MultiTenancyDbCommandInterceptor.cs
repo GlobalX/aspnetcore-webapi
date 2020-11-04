@@ -27,7 +27,7 @@ namespace webapi.Infrastructure
 
         public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
         {
-            SetTenantOnQuery(command);
+            SetTenantOnQuery(ref command);
             return base.ReaderExecuting(command, eventData, result);
         }
 
@@ -36,49 +36,39 @@ namespace webapi.Infrastructure
             InterceptionResult<DbDataReader> result,
             CancellationToken cancellationToken = default)
         {
-            SetTenantOnQuery(command);
+            SetTenantOnQuery(ref command);
             return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
         }
 
         public override Task<InterceptionResult<int>> NonQueryExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<int> result,
             CancellationToken cancellationToken = new CancellationToken())
         {
-            SetTenantOnQuery(command);
+            SetTenantOnQuery(ref command);
             return base.NonQueryExecutingAsync(command, eventData, result, cancellationToken);
         }
 
         public override Task<InterceptionResult<object>> ScalarExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<object> result,
             CancellationToken cancellationToken = new CancellationToken())
         {
-            SetTenantOnQuery(command);
+            SetTenantOnQuery(ref command);
             return base.ScalarExecutingAsync(command, eventData, result, cancellationToken);
         }
 
         public override InterceptionResult<object> ScalarExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<object> result)
         {
-            SetTenantOnQuery(command);
+            SetTenantOnQuery(ref command);
             return base.ScalarExecuting(command, eventData, result);
         }
 
         public override InterceptionResult<int> NonQueryExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<int> result)
         {
-            SetTenantOnQuery(command);
+            SetTenantOnQuery(ref command);
             return base.NonQueryExecuting(command, eventData, result);
         }
 
-        private void SetTenantOnQuery(DbCommand command)
+        private void SetTenantOnQuery(ref DbCommand command)
         {
-            //TODO: Use the existing command rather than round-tripping again
-            var tenantCommand  = new NpgsqlCommand($"SET app.current_tenant = '{_tenantInfo.Id}';", (NpgsqlConnection) command.Connection)
-            {
-                CommandType = CommandType.Text
-            };
-            tenantCommand.ExecuteNonQuery();
-
-            var query = command.Parameters.Cast<DbParameter>().
-                Aggregate(command.CommandText, (current, p) => current.Replace(p.ParameterName, p.Value.ToString()));
-
-            Console.WriteLine(query);
+            command.CommandText = $"SET app.current_tenant = '{_tenantInfo.Id}';" + command.CommandText;
         }
     }
 }
